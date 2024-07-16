@@ -1,0 +1,54 @@
+import requests
+
+def fetch_traffic_data(api_key, origin, destination):
+    base_url = "https://maps.googleapis.com/maps/api/directions/json"
+    params = {
+        "origin": origin,
+        "destination": destination,
+        "key": api_key,
+        "departure_time": "now",
+        "traffic_model": "best_guess",
+        "alternatives": "true"
+    }
+
+    response = requests.get(base_url, params=params)
+
+    if response.status_code == 200:
+        data = response.json()
+        return data
+    else:
+        print(f"Error fetching data: {response.status_code}")
+        return None
+
+def display_traffic_data(data):
+    if data:
+        print("Current Traffic Information:")
+        for route in data['routes']:
+            print(f"Route Summary:")
+            print(f"- Distance: {route['legs'][0]['distance']['text']}")
+            print(f"- Duration in current traffic: {route['legs'][0]['duration_in_traffic']['text']}")
+            print("Traffic Conditions:")
+            for step in route['legs'][0]['steps']:
+                print(f"- {step['html_instructions']}")
+
+            if 'warnings' in route:
+                print("Warnings:")
+                for warning in route['warnings']:
+                    print(f"- {warning}")
+
+            print("")
+
+def main():
+    api_key = input("Enter your Google Maps API key: ")
+    origin = input("Enter starting point (address or coordinates): ")
+    destination = input("Enter destination (address or coordinates): ")
+
+    data = fetch_traffic_data(api_key, origin, destination)
+
+    if data:
+        display_traffic_data(data)
+    else:
+        print("No traffic data available.")
+
+if __name__ == "__main__":
+    main()
